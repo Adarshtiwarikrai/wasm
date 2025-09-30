@@ -148,6 +148,7 @@ pub fn start() -> Result<(), JsValue> {
          click_down.forget()
     }
     {
+        let context = context.clone();
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
             let new_x = event.offset_x() as f64;
             let new_y = event.offset_y() as f64;
@@ -170,8 +171,34 @@ pub fn start() -> Result<(), JsValue> {
             }   
 
         }) as Box<dyn FnMut(_)>);
+        
         canvas.add_event_listener_with_callback("mousemove", click_down.as_ref().unchecked_ref())?;
-         click_down.forget()
+        click_down.forget()
+    }
+    {
+        
+        
+        let context = context.clone();
+        let mouse_up = Closure::wrap(Box::new(move |event: MouseEvent| {
+            
+            let mut num=x.lock().unwrap();
+            let mut num1=y.lock().unwrap();
+            *num=0.0;
+            *num1=0.0;
+             // context.set_stroke_style_str("blue");
+            //  context.stroke_rect(event.offset_x() as f64, event.offset_y() as f64, 10 as f64, 30 as f64);
+            let mut button=buttonclick.lock().unwrap();
+            let mut mouse=mouseclick.lock().unwrap();
+            if(*button==true && *mouse==true){
+                *mouse=false;
+                let mut lastx=movex.lock().unwrap();
+                let mut lasty=movey.lock().unwrap();
+                *lastx=0.0;
+                *lasty=0.0;
+            }
+
+        }) as Box<dyn FnMut(_)>);
+      canvas.add_event_listener_with_callback("mouseup", mouse_up.as_ref().unchecked_ref())?;
     }
     // Get the WebGL rendering context
     // let gl = canvas
