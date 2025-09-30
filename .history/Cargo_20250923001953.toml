@@ -1,0 +1,20 @@
+[package]
+name = "rust_webgl_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "Window",
+    "HtmlCanvasElement",
+    "WebGl2RenderingContext",
+    "WebGlShader",
+    "WebGlProgram",
+    "WebGlBuffer",
+    "WebGlUniformLocation"
+] }
+js-sys = "0.3"
+[lib]
+crate-type = ["cdylib", "rlib"]
