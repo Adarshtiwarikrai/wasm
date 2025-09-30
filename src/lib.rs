@@ -25,6 +25,12 @@ lazy_static! {
 lazy_static! {
     static ref mouseclick: Mutex<bool> = Mutex::new(false);
 }
+lazy_static! {
+    static ref movex: Mutex<f64> = Mutex::new(0.0);
+}
+lazy_static! {
+    static ref movey: Mutex<f64> = Mutex::new(0.0);
+}
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     // Access the document and canvas
@@ -139,6 +145,32 @@ pub fn start() -> Result<(), JsValue> {
         }) as Box<dyn FnMut(_)>);
          square.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
          circle.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
+         click_down.forget()
+    }
+    {
+        let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
+            let new_x = event.offset_x() as f64;
+            let new_y = event.offset_y() as f64;
+            let mut num=x.lock().unwrap();
+            let mut num1=y.lock().unwrap();
+            let mut lastx=movex.lock().unwrap();
+            let mut lasty=movey.lock().unwrap();
+           
+             // context.set_stroke_style_str("blue");
+            //  context.stroke_rect(event.offset_x() as f64, event.offset_y() as f64, 10 as f64, 30 as f64);
+            let mut button=buttonclick.lock().unwrap();
+            let mut mouse=mouseclick.lock().unwrap();
+            if(*button==true && *mouse==true){
+               
+                context.set_stroke_style_str("blue");
+                context.stroke_rect(*num as f64, *num1  as f64, (*num-new_x) as f64, (*num1-new_y)as f64);
+                 context.clear_rect(*num as f64, *num1  as f64, (*num-*lastx) as f64, (*num1-*lasty)as f64);
+                *lastx=new_x;
+                *lasty=new_y;
+            }   
+
+        }) as Box<dyn FnMut(_)>);
+        canvas.add_event_listener_with_callback("mousemove", click_down.as_ref().unchecked_ref())?;
          click_down.forget()
     }
     // Get the WebGL rendering context
@@ -256,3 +288,4 @@ pub fn start() -> Result<(), JsValue> {
 //   --out-dir pkg --target web
 // asdfasdfasdfassdfasdfadsfa
 //python -m http.server 8000
+// wasm-bindgen target/wasm32-unknown-unknown/debug/rust_webgl_example.wasm  --out-dir pkg --target web
