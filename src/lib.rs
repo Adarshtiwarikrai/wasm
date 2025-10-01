@@ -1,5 +1,5 @@
 use wasm_bindgen::{prelude::*, JsCast};
-
+use std::collections::HashMap as Hashmap;                               
 use lazy_static::lazy_static;
 use std::cell::RefCell;
 use std::f64;
@@ -35,6 +35,7 @@ lazy_static! {
 lazy_static! {
     static ref movey: Mutex<f64> = Mutex::new(0.0);
 }
+
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     // Access the document and canvas
@@ -131,11 +132,8 @@ pub fn start() -> Result<(), JsValue> {
             *num1 = new_y;
         }) as Box<dyn FnMut(_)>);
         canvas
-            .add_event_listener_with_callback("mousedown", mouse_down.as_ref().unchecked_ref())?;
-
+        .add_event_listener_with_callback("mousedown", mouse_down.as_ref().unchecked_ref())?;
         document.add_event_listener_with_callback("keydown", key_down.as_ref().unchecked_ref())?;
-       
-
         mouse_down.forget();
         key_down.forget();
     }
@@ -189,7 +187,7 @@ pub fn start() -> Result<(), JsValue> {
                 context.move_to(*num as f64, *num1 as f64);
                 context.line_to((new_x) as f64, (new_y) as f64);
                 context.stroke();
-            }
+            }   
             if (*button == true && *mouse == true) {
                  console::log_3(&"before".into(),&JsValue::from_f64(*num), &JsValue::from_f64(*num1));
                  if *lastx < 0.0 {
