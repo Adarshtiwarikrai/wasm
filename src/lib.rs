@@ -36,6 +36,8 @@ lazy_static! {
     static ref movey: Mutex<f64> = Mutex::new(0.0);
 }
 
+
+
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
     // Access the document and canvas
@@ -182,7 +184,7 @@ pub fn start() -> Result<(), JsValue> {
             console::log_3(&"move move for arrow ".into(),&JsValue::from_bool(*arrownum), &JsValue::from_bool(*mouse));
             if *arrownum==true && *mouse ==true {
                 console::log_1(&"TRYING ARROW MOUSE MOVE".into());
-                context.clear_rect(*num, *num1, 2 as f64, (new_y-*num1));
+                context.clear_rect(0 as f64, 0 as f64, 1600 as f64, 1100 as f64);
                 context.begin_path();
                 context.move_to(*num as f64, *num1 as f64);
                 context.line_to((new_x) as f64, (new_y) as f64);
