@@ -27,6 +27,9 @@ lazy_static! {
     static ref mouseclick: Mutex<bool> = Mutex::new(false);
 }
 lazy_static! {
+    static ref arrowclick: Mutex<bool> = Mutex::new(false);
+}
+lazy_static! {
     static ref movex: Mutex<f64> = Mutex::new(0.0);
 }
 lazy_static! {
@@ -47,6 +50,10 @@ pub fn start() -> Result<(), JsValue> {
         .dyn_into::<HtmlElement>()?;
     let circle = document
         .get_element_by_id("circle")
+        .ok_or("No canvas found")?
+        .dyn_into::<HtmlElement>()?;
+    let arrow = document
+        .get_element_by_id("arrow")
         .ok_or("No canvas found")?
         .dyn_into::<HtmlElement>()?;
 
@@ -75,7 +82,11 @@ pub fn start() -> Result<(), JsValue> {
             if (*num == true) {
                 *num2 = true;
                 console::log_2(&JsValue::from_bool(*num), &JsValue::from_bool(*num2));
-            } 
+            } else {
+                *num2 = true;
+                console::log_1(&"TRYING ARROW".into());
+                
+             }
             // context.set_stroke_style_str("blue");
             //  context.stroke_rect(event.offset_x() as f64, event.offset_y() as f64, 10 as f64, 30 as f64);
             //  context.begin_path();
@@ -131,11 +142,26 @@ pub fn start() -> Result<(), JsValue> {
     {
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
             let mut num = buttonclick.lock().unwrap();
+            let mut num1 = arrowclick.lock().unwrap();
             *num = !*num;
+           
             console::log_2(&"the click is happen".into(), &JsValue::from_bool(*num));
         }) as Box<dyn FnMut(_)>);
         square.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
         circle.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
+       
+        click_down.forget()
+    }
+    {
+        let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
+          
+            let mut num1 = arrowclick.lock().unwrap();
+            
+            *num1 = !*num1;
+           
+        }) as Box<dyn FnMut(_)>);
+        
+        arrow.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
         click_down.forget()
     }
     {
@@ -152,8 +178,18 @@ pub fn start() -> Result<(), JsValue> {
             //  context.stroke_rect(event.offset_x() as f64, event.offset_y() as f64, 10 as f64, 30 as f64);
             let mut button = buttonclick.lock().unwrap();
             let mut mouse = mouseclick.lock().unwrap();
+            let mut arrownum = arrowclick.lock().unwrap();
             let mut lastnum=*num;
             let mut lastnum1=*num1;
+            console::log_3(&"move move for arrow ".into(),&JsValue::from_bool(*arrownum), &JsValue::from_bool(*mouse));
+            if *arrownum==true && *mouse ==true {
+                console::log_1(&"TRYING ARROW MOUSE MOVE".into());
+                context.clear_rect(*num, *num1, 2 as f64, (new_y-*num1));
+                context.begin_path();
+                context.move_to(*num as f64, *num1 as f64);
+                context.line_to((new_x) as f64, (new_y) as f64);
+                context.stroke();
+            }
             if (*button == true && *mouse == true) {
                  console::log_3(&"before".into(),&JsValue::from_f64(*num), &JsValue::from_f64(*num1));
                  if *lastx < 0.0 {
@@ -200,6 +236,7 @@ pub fn start() -> Result<(), JsValue> {
                     *lasty += 2.0;
                 }
             }
+           
         }) as Box<dyn FnMut(_)>);
 
         canvas
@@ -211,6 +248,7 @@ pub fn start() -> Result<(), JsValue> {
         let mouse_up = Closure::wrap(Box::new(move |event: MouseEvent| {
             let mut num = x.lock().unwrap();
             let mut num1 = y.lock().unwrap();
+            let mut arrownum = arrowclick.lock().unwrap();
             *num = 0.0;
             *num1 = 0.0;
             // context.set_stroke_style_str("blue");
@@ -225,6 +263,12 @@ pub fn start() -> Result<(), JsValue> {
                 *lastx = 0.0;
                 *lasty = 0.0;
                 console::log_2(&"mouse is up ".into(), &JsValue::from_bool(*mouse));
+            }
+            if(*arrownum && *mouse == true){
+                *mouse = false;
+                *arrownum = false;
+                context.close_path();
+                console::log_2(&"mouse is up arrow ".into(), &JsValue::from_bool(*mouse));
             }
         }) as Box<dyn FnMut(_)>);
         canvas.add_event_listener_with_callback("mouseup", mouse_up.as_ref().unchecked_ref())?;
