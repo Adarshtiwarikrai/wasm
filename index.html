@@ -13,7 +13,9 @@
     <button id="draw">draw</button>
     <script type="module">
         import init from "./pkg/rust_webgl_example.js";
-        init();
+        init().then(() => {
+            console.log("🚀 WebAssembly initialized!");
+          });
     </script>
 </body>
 </html>

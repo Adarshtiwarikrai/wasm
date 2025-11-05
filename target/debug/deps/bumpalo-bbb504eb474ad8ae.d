@@ -1,0 +1,9 @@
+C:\Users\Ankit\wasm\target\debug\deps\bumpalo-bbb504eb474ad8ae.d: C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\lib.rs C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\alloc.rs C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\../README.md
+
+C:\Users\Ankit\wasm\target\debug\deps\libbumpalo-bbb504eb474ad8ae.rlib: C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\lib.rs C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\alloc.rs C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\../README.md
+
+C:\Users\Ankit\wasm\target\debug\deps\libbumpalo-bbb504eb474ad8ae.rmeta: C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\lib.rs C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\alloc.rs C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\../README.md
+
+C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\lib.rs:
+C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\alloc.rs:
+C:\Users\Ankit\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\bumpalo-3.19.0\src\../README.md:

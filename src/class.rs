@@ -1,4 +1,4 @@
-struct Shape{
+pub struct Shape{
   startx: f64,
   starty: f64,
   endx: f64,            
