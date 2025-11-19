@@ -11,9 +11,19 @@
     <button id="circle">circle</button>
     <button id="arrow">arrow</button>
     <button id="draw">draw</button>
+    <button id="undo">undo</button>
+    <button id="redo">redo</button>
+    
     <script type="module">
         import init from "./pkg/rust_webgl_example.js";
-        init();
+
+        async function run() {
+            console.log("Loading WASM...");
+            await init();   // 🔥 THIS MUST BE WAITED
+            console.log("WASM Loaded!");
+        }
+
+        run();
     </script>
 </body>
 </html>
