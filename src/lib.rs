@@ -4,25 +4,19 @@ use std::cell::RefCell;
 use std::collections::HashMap as Hashmap;
 use std::f64;
 use std::rc::Rc;
-use std::sync::Mutex;
+use std::sync::{OnceLock, Mutex}
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::HtmlElement;
 mod class;
 use class::Shape;
+mod state;
+use state::State;
 use web_sys::{
     console, CanvasRenderingContext2d, Event, HtmlCanvasElement, KeyboardEvent, MouseEvent,
     WebGlProgram, WebGlRenderingContext, WebGlShader,
 };
 
-lazy_static! {
-    static ref buttonclick: Mutex<bool> = Mutex::new(false);
-}
-lazy_static! {
-    static ref x: Mutex<f64> = Mutex::new(0.0);
-}
-lazy_static! {
-    static ref y: Mutex<f64> = Mutex::new(0.0);
-}
+
 pub fn draw(context: CanvasRenderingContext2d, shapes: &Vec<Shape>,moves:&Vec<Shape>) {
     context.clear_rect(0.0, 0.0, 10000.0, 10000.0); 
     for shape in shapes.iter() {
@@ -32,13 +26,10 @@ pub fn draw(context: CanvasRenderingContext2d, shapes: &Vec<Shape>,moves:&Vec<Sh
         movee.create_shape(context.clone());
     }
 }
-
+static STATE: OnceLock<Mutex<State>> = OnceLock::new();
 #[wasm_bindgen(start)]
 pub fn start() -> Result<(), JsValue> {
-    let shapes = Rc::new(RefCell::new(Vec::new()));
-    let moveshapes=Rc::new(RefCell::new(Vec::new()));
-    let undoshapes = Rc::new(RefCell::new(Vec::new()));
-
+    
     console::log_1(&"Hello from Rust WASM! this is first ".into());
 
     let window = web_sys::window().ok_or("No global window found")?;
@@ -52,7 +43,18 @@ pub fn start() -> Result<(), JsValue> {
         .get_element_by_id("square")
         .ok_or("No canvas found")?
         .dyn_into::<HtmlElement>()?;
-
+    let circle = document
+        .get_element_by_id("circle")
+        .ok_or("No canvas found")?
+        .dyn_into::<HtmlElement>()?;
+    let line = document
+        .get_element_by_id("line")
+        .ok_or("No canvas found")?
+        .dyn_into::<HtmlElement>()?;
+    let arrow = document
+        .get_element_by_id("arrow")
+        .ok_or("No canvas found")?
+        .dyn_into::<HtmlElement>()?;
     let context = canvas
         .get_context("2d")?
         .unwrap()
@@ -75,89 +77,78 @@ pub fn start() -> Result<(), JsValue> {
     // -------------------------------------------------------------------
     {
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
-            let mut num = buttonclick.lock().unwrap();
-            *num = !*num;
-            console::log_2(&"the click happened".into(), &JsValue::from_bool(*num));
+          let mut s=state.lock().unwrap();
+          s.action("square");
         }) as Box<dyn FnMut(_)>);
 
         square.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
         click_down.forget();
     }
+      // -------------------------------------------------------------------
+    // circle click
+    // -------------------------------------------------------------------
+    {
+        let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let mut s=state.lock().unwrap();
+          s.action("circle");
+        }) as Box<dyn FnMut(_)>);
+
+        circle.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
+        click_down.forget();
+    }
+      // -------------------------------------------------------------------
+    // arrow click
+    // -------------------------------------------------------------------
+    {
+        let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let mut s=state.lock().unwrap();
+          s.action("arrow");
+        }) as Box<dyn FnMut(_)>);
+
+        arrow.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
+        click_down.forget();
+    }
+      // -------------------------------------------------------------------
+    // draw click
+    // -------------------------------------------------------------------
+    {
+        let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let mut s=state.lock().unwrap();
+          s.action("line");
+        }) as Box<dyn FnMut(_)>);
+
+        draw.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
+        click_down.forget();
+    }
+
 
     // -------------------------------------------------------------------
     // canvas mousedown -- add shape
     // -------------------------------------------------------------------
     {
-        let context = context.clone();
-        let shapes_ref = shapes.clone();
-        let undo_ref = undoshapes.clone();
-        let moves_ref=moveshapes.clone();
+        
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
             let new_x = event.offset_x() as f64;
             let new_y = event.offset_y() as f64;
-            let mut num = x.lock().unwrap();
-            *num = new_x;
-            let mut num1 = y.lock().unwrap();
-            *num1 = new_y;
-            let shape = Shape::new(
-                new_x,
-                new_y,
-                new_x+10.0,
-                new_y+10.0,
-                0.0,
-                360.0,
-                10.0,
-                "square".to_string(),
-                "red".to_string(),
-                false,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
-            );
-
-            shapes_ref.borrow_mut().push(shape);
-            undo_ref.borrow_mut().clear();
-            draw(context.clone(), &shapes_ref.borrow(),&moves_ref.borrow());
+            let mut s=state.lock().unwrap();
+            s.mousedown(new_x,new_y);
         }) as Box<dyn FnMut(_)>);
 
         canvas.add_event_listener_with_callback("mousedown", click_down.as_ref().unchecked_ref())?;
         click_down.forget();
     }
     {
-        let context = context.clone();
-        let moves_ref=moveshapes.clone();
-        let shapes_ref= shapes.clone();
-        let undo_ref=undoshapes.clone();
+        
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
             let new_x = event.offset_x() as f64;
             let new_y = event.offset_y() as f64;
-            let mut num = x.lock().unwrap();
-            let mut num1 = y.lock().unwrap();
-            let shape = Shape::new(
-                *num,
-                *num1,
-                new_x,
-                new_y,
-                0.0,
-                360.0,
-                10.0,
-                "square".to_string(),
-                "red".to_string(),
-                false,
-                0.0,
-                0.0,
-                1.0,
-                1.0,
-            );
-            console::log_2(&JsValue::from_f64(new_x), &JsValue::from_f64(new_y));
-
-            {
-                let mut vec = moves_ref.borrow_mut();
-                vec.clear();
-                vec.push(shape);
-            } 
-            draw(context.clone(), &moves_ref.borrow(),&shapes_ref.borrow());
+            let state = STATE.get_or_init(|| {
+                println!("Initializing GameState...");
+                Mutex::new(State::new(new_x, new_y));
+            });
+        
+            let mut s=state.lock().unwrap();
+            s.mousemove(new_x,new_y);
         }) as Box<dyn FnMut(_)>);
 
         canvas.add_event_listener_with_callback("mousemove", click_down.as_ref().unchecked_ref())?;
@@ -165,20 +156,12 @@ pub fn start() -> Result<(), JsValue> {
     }
     {
 
-        let context=context.clone();
-        let moves_ref=moveshapes.clone();
-        let shapes_ref= shapes.clone();
         
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
-        if moves_ref.borrow().len()>0{
-           if let Some(last)=moves_ref.borrow_mut().pop(){
-            shapes_ref.borrow_mut().push(last);
-           }
-           moves_ref.borrow_mut().clear();
-        }
-        
-           
-            draw(context.clone(), &shapes_ref.borrow(),&moves_ref.borrow());
+            let new_x = event.offset_x() as f64;
+            let new_y = event.offset_y() as f64;
+            let mut s=state.lock().unwrap();
+            s.mouseup(new_x,new_y);
         }) as Box<dyn FnMut(_)>);
         canvas.add_event_listener_with_callback("mouseup",click_down.as_ref().unchecked_ref())?;
         click_down.forget();
@@ -187,28 +170,11 @@ pub fn start() -> Result<(), JsValue> {
     // redo button
     // -------------------------------------------------------------------
     {
-        let context = context.clone();
-        let shapes_ref = shapes.clone();
-        let undo_ref = undoshapes.clone();
-        let moves_ref=moveshapes.clone();
+        
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
-            console::log_1(&"redo button clicked".into());
-
-            let undo_len = undo_ref.borrow().len();
-            console::log_1(&JsValue::from(undo_len));
-
-            if undo_len > 0 {
-                console::log_1(&"redo button clicked hi from inside ".into());
-
-                if let Some(last) = undo_ref.borrow_mut().pop() {
-                    shapes_ref.borrow_mut().push(last);
-                }
-                let undo_len = undo_ref.borrow().len();
-                console::log_1(&JsValue::from(undo_len));
-                console::log_1(&"redo button clicked hi from outside ".into());
-
-                draw(context.clone(), &shapes_ref.borrow(),&moves_ref.borrow());
-            }
+            
+            let mut s=state.lock().unwrap();
+            s.undo();
         }) as Box<dyn FnMut(_)>);
 
         redo.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -219,27 +185,10 @@ pub fn start() -> Result<(), JsValue> {
     // undo button
     // -------------------------------------------------------------------
     {
-        let context = context.clone();
-        let shapes_ref = shapes.clone();
-        let undo_ref = undoshapes.clone();
-        let moves_ref=moveshapes.clone();
+      
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
-            console::log_1(&"undo button clicked".into());
-
-            let shape_len = shapes_ref.borrow().len();
-            console::log_1(&JsValue::from(shape_len));
-
-            if shape_len > 0 {
-                console::log_1(&"undo button clicked hi from inside ".into());
-                if let Some(last) = shapes_ref.borrow_mut().pop() {
-                    undo_ref.borrow_mut().push(last);
-                }
-                let shape_len = shapes_ref.borrow().len();
-                console::log_1(&JsValue::from(shape_len));
-                console::log_1(&"undo button clicked work done  ".into());
-
-                draw(context.clone(), &shapes_ref.borrow(),&moves_ref.borrow());
-            }
+            let mut s=state.lock().unwrap();
+            s.undo(); 
         }) as Box<dyn FnMut(_)>);
 
         undobutton.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
