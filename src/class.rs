@@ -57,6 +57,7 @@ impl Shape {
 
   pub fn create_shape(&self, context: CanvasRenderingContext2d) {
       if self.shape == "square" {
+        console::log_1(&"square action in shape".into());
           context.stroke_rect(self.startx, self.starty, (self.endx-self.startx), (self.endy-self.starty));
       } 
       else if self.shape == "circle" {
@@ -76,13 +77,13 @@ impl Shape {
               context.set_stroke_style_str(&self.colour );
           context.stroke();
       } 
-      else if self.shape == "arrow" {
+      else if self.shape == "line" {
           context.begin_path();
           context.line_to(self.endx, self.endy);
           context.set_stroke_style_str(&self.colour );
           context.stroke();
       } 
-      else if self.shape == "line" {
+      else if self.shape == "arrow" {
           context.begin_path();
           context.move_to(self.startx, self.starty);
           context.line_to(self.endx, self.endy);

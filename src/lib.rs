@@ -4,7 +4,7 @@ use std::cell::RefCell;
 use std::collections::HashMap as Hashmap;
 use std::f64;
 use std::rc::Rc;
-use std::sync::{OnceLock, Mutex}
+use std::sync::{OnceLock, Mutex};
 use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::HtmlElement;
 mod class;
@@ -48,7 +48,7 @@ pub fn start() -> Result<(), JsValue> {
         .ok_or("No canvas found")?
         .dyn_into::<HtmlElement>()?;
     let line = document
-        .get_element_by_id("line")
+        .get_element_by_id("draw")
         .ok_or("No canvas found")?
         .dyn_into::<HtmlElement>()?;
     let arrow = document
@@ -75,10 +75,14 @@ pub fn start() -> Result<(), JsValue> {
     // -------------------------------------------------------------------
     // square click
     // -------------------------------------------------------------------
-    {
+    {   
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.action("square");
+          console::log_1(&"square action".into());
+          s.shape("square".to_string());
+          draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
         square.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -87,10 +91,13 @@ pub fn start() -> Result<(), JsValue> {
       // -------------------------------------------------------------------
     // circle click
     // -------------------------------------------------------------------
-    {
+    {   
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.action("circle");
+          s.shape("circle".to_string());
+          draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
         circle.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -99,10 +106,13 @@ pub fn start() -> Result<(), JsValue> {
       // -------------------------------------------------------------------
     // arrow click
     // -------------------------------------------------------------------
-    {
+    {    
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.action("arrow");
+          s.shape("arrow".to_string());
+          draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
         arrow.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -111,13 +121,16 @@ pub fn start() -> Result<(), JsValue> {
       // -------------------------------------------------------------------
     // draw click
     // -------------------------------------------------------------------
-    {
+    {    
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+          let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.action("line");
+          s.shape("line".to_string());
+          draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
-        draw.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
+        line.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
         click_down.forget();
     }
 
@@ -130,6 +143,7 @@ pub fn start() -> Result<(), JsValue> {
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
             let new_x = event.offset_x() as f64;
             let new_y = event.offset_y() as f64;
+            let state = STATE.get().expect("GameState not initialized!");
             let mut s=state.lock().unwrap();
             s.mousedown(new_x,new_y);
         }) as Box<dyn FnMut(_)>);
@@ -140,11 +154,14 @@ pub fn start() -> Result<(), JsValue> {
     {
         
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
+
             let new_x = event.offset_x() as f64;
             let new_y = event.offset_y() as f64;
+            console::log_1(&"mouse is move arrow ".into());
             let state = STATE.get_or_init(|| {
+                console::log_1(&"mouse is move in function arrow ".into());
                 println!("Initializing GameState...");
-                Mutex::new(State::new(new_x, new_y));
+                Mutex::new(State::new(new_x, new_y))
             });
         
             let mut s=state.lock().unwrap();
@@ -160,6 +177,7 @@ pub fn start() -> Result<(), JsValue> {
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
             let new_x = event.offset_x() as f64;
             let new_y = event.offset_y() as f64;
+            let state = STATE.get().expect("GameState not initialized!");
             let mut s=state.lock().unwrap();
             s.mouseup(new_x,new_y);
         }) as Box<dyn FnMut(_)>);
@@ -170,11 +188,12 @@ pub fn start() -> Result<(), JsValue> {
     // redo button
     // -------------------------------------------------------------------
     {
-        
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
-            
+            let state = STATE.get().expect("GameState not initialized!");
             let mut s=state.lock().unwrap();
-            s.undo();
+            s.redo();
+            draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
         redo.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -185,10 +204,12 @@ pub fn start() -> Result<(), JsValue> {
     // undo button
     // -------------------------------------------------------------------
     {
-      
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
+            let state = STATE.get().expect("GameState not initialized!");
             let mut s=state.lock().unwrap();
             s.undo(); 
+            draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
         undobutton.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;

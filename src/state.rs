@@ -1,9 +1,10 @@
 use js_sys::Math::abs;
+use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{
   console, CanvasRenderingContext2d, Event, HtmlCanvasElement, KeyboardEvent, MouseEvent,
   WebGlProgram, WebGlRenderingContext, WebGlShader,
 };
-mod class;
+use crate::class;
 use class::Shape;
 #[derive(Debug, Clone)]
 pub struct State {
@@ -23,48 +24,48 @@ impl State {
   pub fn new(
     startx:f64,
     starty:f64
-  )->self{
+  )->Self{
     State{
-        startx,
-        starty,
-        startx,
-        starty,
-        startx,
-        starty,
-        Vec::new(),
-        Vec::new(),
-        Vec::new(),
-        Vec::new(),
-        "mousemove"
+        mousedownx:startx,
+        mousedowny:starty,
+        mousemovex:startx,
+        mousemovey:starty,
+        mouseupx:startx,
+        mouseupy:starty,
+        shapes:Vec::new(),
+        undoshapes:Vec::new(),
+        redoshapes:Vec::new(),
+        movesshapes:Vec::new(),
+        actions:"".to_string()
     }
   }
-  pub fn mousedown(&self ,startx:f64,starty:f64){
+  pub fn mousedown(&mut self ,startx:f64,starty:f64){
     self.mousedownx=startx;
     self.mousedowny=starty;
   }
-  pub fn mousemove(&self,startx:f64,starty:f64){
+  pub fn mousemove(&mut self,startx:f64,starty:f64){
     self.mousemovex=startx;
     self.mousemovey=starty;
   }
-  pub fn mouseup(&self,startx:f64,starty:f64){
+  pub fn mouseup(&mut self,startx:f64,starty:f64){
     self.mouseupx=startx;
     self.mouseupy=starty;
   }
-  pub fn undo(&self){
+  pub fn undo(& mut self){
     if self.shapes.len()>0{
-      if let Some(last)=shapes.pop(){
+      if let Some(last)=self.shapes.pop(){
         self.undoshapes.push(last);
       }
     }
   }
-  pub fn redo(&self){
+  pub fn redo(& mut self){
     if self.undoshapes.len()>0{
-        if let Some(last)=undoshapes.pop(){
+        if let Some(last)=self.undoshapes.pop(){
             self.shapes.push(last);
         }
     }
   }
-  pub fn shape(&self,action:String){
+  pub fn shape(& mut self,action:String){
     if action=="arrow" {
       let shape=Shape::new(
         self.mousedownx,
@@ -83,8 +84,10 @@ impl State {
         1.0,
     );
     self.shapes.push(shape);
+   
     }
     else if action=="square"{
+      console::log_1(&"square action in state ".into());
         let shape=Shape::new(
             self.mousedownx,
             self.mousedowny,
@@ -102,6 +105,7 @@ impl State {
             1.0,
         );
         self.shapes.push(shape);
+        console::log_1(&JsValue::from(self.shapes.len()));
     }
     else if action=="circle"{
         let shape=Shape::new(
