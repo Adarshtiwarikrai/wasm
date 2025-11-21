@@ -18,7 +18,11 @@ pub struct State {
     pub undoshapes:Vec<Shape>,
     pub redoshapes:Vec<Shape>,
     pub movesshapes:Vec<Shape>,
-    pub actions:String
+    pub actions:String,
+    pub square:bool,
+    pub circle:bool,
+    pub arrow:bool,
+    pub draw:bool
 }
 impl State {
   pub fn new(
@@ -36,7 +40,11 @@ impl State {
         undoshapes:Vec::new(),
         redoshapes:Vec::new(),
         movesshapes:Vec::new(),
-        actions:"".to_string()
+        actions:"".to_string(),
+        square:false,
+        circle:false,
+        arrow:false,
+        draw:false
     }
   }
   pub fn mousedown(&mut self ,startx:f64,starty:f64){
@@ -64,14 +72,28 @@ impl State {
             self.shapes.push(last);
         }
     }
+  } 
+  pub fn movetoshape(& mut self){
+    if self.movesshapes.len()>0{
+      if let Some(last)=self.movesshapes.pop(){
+          self.shapes.push(last);
+      }
+  }
+  }
+  pub fn removemoveshape(& mut self){
+    if self.movesshapes.len()>0{
+      if let Some(last)=self.movesshapes.pop(){
+          
+      }
+  }
   }
   pub fn shape(& mut self,action:String){
     if action=="arrow" {
       let shape=Shape::new(
         self.mousedownx,
         self.mousedowny,
-        self.mouseupx,
-        self.mouseupy,
+        self.mousemovex,
+        self.mousemovey,
         0.0,
         360.0,
         10.0,
@@ -91,8 +113,8 @@ impl State {
         let shape=Shape::new(
             self.mousedownx,
             self.mousedowny,
-            self.mouseupx,
-            self.mouseupy,
+            self.mousemovex,
+            self.mousemovey,
             0.0,
             360.0,
             10.0,
@@ -111,8 +133,8 @@ impl State {
         let shape=Shape::new(
             self.mousedownx,
             self.mousedowny,
-            self.mouseupx,
-            self.mouseupy,
+            self.mousemovex,
+            self.mousemovey,
             0.0,
             360.0,
             10.0,
@@ -130,8 +152,8 @@ impl State {
         let shape=Shape::new(
             self.mousedownx,
             self.mousedowny,
-            self.mouseupx,
-            self.mouseupy,
+            self.mousemovex,
+            self.mousemovey,
             0.0,
             360.0,
             10.0,

@@ -81,8 +81,8 @@ pub fn start() -> Result<(), JsValue> {
           let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
           console::log_1(&"square action".into());
-          s.shape("square".to_string());
-          draw(context.clone(), &s.shapes,&s.movesshapes);
+          s.square=!s.square;
+         
         }) as Box<dyn FnMut(_)>);
 
         square.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -96,8 +96,7 @@ pub fn start() -> Result<(), JsValue> {
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
           let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.shape("circle".to_string());
-          draw(context.clone(), &s.shapes,&s.movesshapes);
+         s.circle=!s.circle;
         }) as Box<dyn FnMut(_)>);
 
         circle.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -111,8 +110,7 @@ pub fn start() -> Result<(), JsValue> {
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
           let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.shape("arrow".to_string());
-          draw(context.clone(), &s.shapes,&s.movesshapes);
+          s.arrow=!s.arrow;
         }) as Box<dyn FnMut(_)>);
 
         arrow.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
@@ -126,8 +124,7 @@ pub fn start() -> Result<(), JsValue> {
         let click_down = Closure::wrap(Box::new(move |_event: MouseEvent| {
           let state = STATE.get().expect("GameState not initialized!");
           let mut s=state.lock().unwrap();
-          s.shape("line".to_string());
-          draw(context.clone(), &s.shapes,&s.movesshapes);
+         s.draw=!s.draw;
         }) as Box<dyn FnMut(_)>);
 
         line.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
