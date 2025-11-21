@@ -105,7 +105,7 @@ impl State {
         1.0,
         1.0,
     );
-    self.shapes.push(shape);
+    self.movesshapes.push(shape);
    
     }
     else if action=="square"{
@@ -126,7 +126,7 @@ impl State {
             1.0,
             1.0,
         );
-        self.shapes.push(shape);
+        self.movesshapes.push(shape);
         console::log_1(&JsValue::from(self.shapes.len()));
     }
     else if action=="circle"{
@@ -146,7 +146,7 @@ impl State {
             1.0,
             1.0,
         );
-        self.shapes.push(shape);
+        self.movesshapes.push(shape);
     }
     else if action=="line"{
         let shape=Shape::new(
@@ -165,7 +165,7 @@ impl State {
             1.0,
             1.0,
         );
-        self.shapes.push(shape);
+        self.movesshapes.push(shape);
     }
 
   }

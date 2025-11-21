@@ -1,1 +1,1 @@
-C:\Users\Ankit\wasm\target\wasm32-unknown-unknown\debug\rust_webgl_example.wasm: C:\Users\Ankit\wasm\src\class.rs C:\Users\Ankit\wasm\src\lib.rs C:\Users\Ankit\wasm\src\state.rs
+C:\Users\SS\wasm\target\wasm32-unknown-unknown\debug\rust_webgl_example.wasm: C:\Users\SS\wasm\src\class.rs C:\Users\SS\wasm\src\lib.rs C:\Users\SS\wasm\src\state.rs

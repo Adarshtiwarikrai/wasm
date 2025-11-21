@@ -351,3 +351,6 @@ pub fn start() -> Result<(), JsValue> {
 // asdfasdfasdfassdfasdfadsfa
 // python -m http.server 8000
 // wasm-bindgen target/wasm32-unknown-unknown/debug/rust_webgl_example.wasm  --out-dir pkg --target web
+//cargo install wasm-bindgen-cli
+//cargo install -f wasm-bindgen-cli --version 0.2.103
+//rustup target add wasm32-unknown-unknown

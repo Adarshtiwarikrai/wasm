@@ -143,13 +143,14 @@ pub fn start() -> Result<(), JsValue> {
             let state = STATE.get().expect("GameState not initialized!");
             let mut s=state.lock().unwrap();
             s.mousedown(new_x,new_y);
+            
         }) as Box<dyn FnMut(_)>);
 
         canvas.add_event_listener_with_callback("mousedown", click_down.as_ref().unchecked_ref())?;
         click_down.forget();
     }
-    {
-        
+    {    
+        let context=context.clone();
         let click_down = Closure::wrap(Box::new(move |event: MouseEvent| {
 
             let new_x = event.offset_x() as f64;
@@ -163,6 +164,23 @@ pub fn start() -> Result<(), JsValue> {
         
             let mut s=state.lock().unwrap();
             s.mousemove(new_x,new_y);
+            if s.square==true {
+                s.removemoveshape();
+                s.shape("square".to_string());
+            }
+            else if s.circle==true{
+                s.removemoveshape();
+                s.shape("circle".to_string());
+            }
+            else if s.arrow==true{
+                s.removemoveshape();
+                s.shape("arrow".to_string());
+            }
+            else if s.draw==true{
+                s.removemoveshape();
+                s.shape("draw".to_string());
+            }
+            draw(context.clone(), &s.shapes,&s.movesshapes);
         }) as Box<dyn FnMut(_)>);
 
         canvas.add_event_listener_with_callback("mousemove", click_down.as_ref().unchecked_ref())?;
@@ -177,6 +195,22 @@ pub fn start() -> Result<(), JsValue> {
             let state = STATE.get().expect("GameState not initialized!");
             let mut s=state.lock().unwrap();
             s.mouseup(new_x,new_y);
+            if s.square==true {
+                s.movetoshape();
+                s.square=false;
+            }
+            else if s.circle==true{
+                s.movetoshape();
+                s.circle=false;
+            }
+            else if s.arrow==true{
+                s.movetoshape();
+                s.arrow=false;
+            }
+            else if s.draw==true{
+                s.movetoshape();
+                s.draw=false;
+            }
         }) as Box<dyn FnMut(_)>);
         canvas.add_event_listener_with_callback("mouseup",click_down.as_ref().unchecked_ref())?;
         click_down.forget();
