@@ -19,7 +19,7 @@ pub struct State {
     pub undoshapes:Vec<Shape>,
     pub redoshapes:Vec<Shape>,
     pub movesshapes:Vec<Shape>,
-    pub dragshapes: VecDeque<Shape>,
+    pub dragshapes: Vec<Shape>,
     pub actions:String,
     pub square:bool,
     pub circle:bool,
@@ -43,7 +43,7 @@ impl State {
         undoshapes:Vec::new(),
         redoshapes:Vec::new(),
         movesshapes:Vec::new(),
-        dragshapes: VecDeque::new(),
+        dragshapes: Vec::new(),
         actions:"".to_string(),
         square:false,
         circle:false,
@@ -118,10 +118,14 @@ impl State {
           let inside_y = shape.starty <= starty && shape.starty+len2 >= starty;
 
             if inside_x || inside_y {
-            console::log_1(&"square clicked in boundary ".into());
+            console::log_2(&"square clicked in boundary ".into(),&JsValue::from(i));
+            
             shape.drag=true;
             let item=self.shapes.remove(i);
-            self.dragshapes.push_back(item);
+            self.shapes.append(& mut self.dragshapes);
+            self.dragshapes.clear();
+            self.dragshapes.push(item);
+            
             }
       }
     }
@@ -146,24 +150,25 @@ impl State {
   
   }
   pub fn removedragshape(& mut self,context:CanvasRenderingContext2d,startx:f64,starty:f64){
-    if let Some(mut shape) = self.dragshapes.pop_back() {
+    if let Some(mut shape) = self.dragshapes.pop() {
     
       let lw = context.line_width();
       context.clear_rect(shape.startx-lw/2.0, shape.starty-lw/2.0, shape.length+1.0, shape.width+1.0); 
       shape.startx = startx;
       shape.starty = starty;
       
-      self.dragshapes.push_front(shape);
+      self.dragshapes.push(shape);
     }
   }
   pub fn dragtoshape(& mut self){
     if self.dragshapes.len()>0{
       console::log_2(&"square to  the shape from drag ".into(),&JsValue::from(self.dragshapes.len()));
       
-      if let Some(mut last)=self.dragshapes.pop_back(){
+      if let Some(mut last)=self.dragshapes.pop(){
         last.drag=false;
-          self.shapes.push(last);
+        self.shapes.push(last);
       }
+      console::log_2(&"square to  the shape from drag ".into(),&JsValue::from(self.dragshapes.len()));
   }
   }
   pub fn shape(& mut self,action:String){

@@ -144,7 +144,8 @@ pub fn start() -> Result<(), JsValue> {
             let mut s=state.lock().unwrap();
             s.mousedown(new_x,new_y);
             s.movetodragshapes(new_x,new_y);
-           
+            console::log_1(&"clicked down".into(),);
+            
         }) as Box<dyn FnMut(_)>);
 
         canvas.add_event_listener_with_callback("mousedown", click_down.as_ref().unchecked_ref())?;
@@ -181,10 +182,7 @@ pub fn start() -> Result<(), JsValue> {
                 s.removemoveshape(context.clone());
                 s.shape("draw".to_string());
             }
-            // if s.drag==true{
-            //     s.removedragshape(context.clone(),new_x,new_y);
-            //     s.shapeview(context.clone(), "drag".to_string());
-            // }
+            
             s.removedragshape(context.clone(),new_x,new_y);
             
             s.shapeview(context.clone(),"moves".to_string());
@@ -218,15 +216,7 @@ pub fn start() -> Result<(), JsValue> {
                 s.movetoshape();
                 s.draw=false;
             }
-            // if s.drag==true {
-            //     console::log_1(&"square darg is true".into());
-
-            //     s.drag=false;
-            //     console::log_2(&"square darg is false".into(),&JsValue::from_bool(s.drag));
-            //     s.dragtoshape();
-                
-               
-            // }
+            console::log_1(&"clicked up".into(),);
             s.dragtoshape();
         }) as Box<dyn FnMut(_)>);
         canvas.add_event_listener_with_callback("mouseup",click_down.as_ref().unchecked_ref())?;
@@ -243,7 +233,7 @@ pub fn start() -> Result<(), JsValue> {
             s.redo();
            
             s.shapeview(context.clone(), "shapes".to_string());
-            
+           
         }) as Box<dyn FnMut(_)>);
 
         redo.add_event_listener_with_callback("click", click_down.as_ref().unchecked_ref())?;
