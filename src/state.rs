@@ -4,6 +4,7 @@ use web_sys::{
   console, CanvasRenderingContext2d, Event, HtmlCanvasElement, KeyboardEvent, MouseEvent,
   WebGlProgram, WebGlRenderingContext, WebGlShader,
 };
+use std::collections::VecDeque;
 use crate::class;
 use class::Shape;
 #[derive(Debug, Clone)]
@@ -18,13 +19,13 @@ pub struct State {
     pub undoshapes:Vec<Shape>,
     pub redoshapes:Vec<Shape>,
     pub movesshapes:Vec<Shape>,
-    pub dragshapes:Vec<Shape>,
+    pub dragshapes: VecDeque<Shape>,
     pub actions:String,
     pub square:bool,
     pub circle:bool,
     pub arrow:bool,
     pub draw:bool,
-    pub drag:bool,
+   
 }
 impl State {
   pub fn new(
@@ -42,25 +43,25 @@ impl State {
         undoshapes:Vec::new(),
         redoshapes:Vec::new(),
         movesshapes:Vec::new(),
-        dragshapes:Vec::new(),
+        dragshapes: VecDeque::new(),
         actions:"".to_string(),
         square:false,
         circle:false,
         arrow:false,
         draw:false,
-        drag:false,
+        
     }
   }
   pub fn shapeview(&mut self,context:CanvasRenderingContext2d,types:String){
     context.clear_rect(0.0, 0.0, 10000.0, 10000.0); 
-    for shape in self.shapes.iter() {
+     for shape in self.shapes.iter() {
       shape.create_shape(context.clone());
-     }
-    for shape in self.dragshapes.iter() {
-    shape.create_shape(context.clone());
-     } 
+    }
+     for shape in self.dragshapes.iter() {
+     shape.create_shape(context.clone());
+    } 
      for shape in self.movesshapes.iter() {
-  shape.create_shape(context.clone());
+     shape.create_shape(context.clone());
     }
     
   }
@@ -108,7 +109,7 @@ impl State {
   pub fn movetodragshapes(& mut self,startx:f64,starty:f64){
     
     for i in  (0..self.shapes.len()).rev() {
-      let shape = &self.shapes[i]; 
+      let shape = &mut self.shapes[i]; 
 
       if shape.shape=="square"{
           let len=(shape.endx-shape.startx) as f64;
@@ -117,16 +118,16 @@ impl State {
           let inside_y = shape.starty <= starty && shape.starty+len2 >= starty;
 
             if inside_x || inside_y {
-              console::log_1(&"square clicked in boundary ".into());
-            self.drag=true;
+            console::log_1(&"square clicked in boundary ".into());
+            shape.drag=true;
             let item=self.shapes.remove(i);
-            self.dragshapes.push(item);
+            self.dragshapes.push_back(item);
             }
       }
     }
   
   }
-  pub fn checktodragshapes(& mut self,startx:f64,starty:f64,canvas:HtmlCanvasElement){
+  pub fn checktodragshapes(& mut self,startx:f64,starty:f64){
     
     for i in  (0..self.shapes.len()).rev() {
       let shape = &self.shapes[i]; 
@@ -138,28 +139,29 @@ impl State {
           let inside_y = shape.starty <= starty && shape.starty+len2 >= starty;
 
             if inside_x || inside_y {
-              console::log_1(&"square clicked in boundary ".into());
-             
+            
             }
       }
     }
   
   }
   pub fn removedragshape(& mut self,context:CanvasRenderingContext2d,startx:f64,starty:f64){
-    if let Some(mut shape) = self.dragshapes.pop() {
-      console::log_1(&"square moving ".into());
+    if let Some(mut shape) = self.dragshapes.pop_back() {
+    
       let lw = context.line_width();
       context.clear_rect(shape.startx-lw/2.0, shape.starty-lw/2.0, shape.length+1.0, shape.width+1.0); 
       shape.startx = startx;
       shape.starty = starty;
       
-      self.dragshapes.push(shape);
+      self.dragshapes.push_front(shape);
     }
   }
   pub fn dragtoshape(& mut self){
     if self.dragshapes.len()>0{
-      console::log_1(&"square to  the shape from drag ".into());
-      if let Some(last)=self.dragshapes.pop(){
+      console::log_2(&"square to  the shape from drag ".into(),&JsValue::from(self.dragshapes.len()));
+      
+      if let Some(mut last)=self.dragshapes.pop_back(){
+        last.drag=false;
           self.shapes.push(last);
       }
   }
@@ -183,6 +185,7 @@ impl State {
         0.0,
         1.0,
         1.0,
+        false,
     );
     shape.calculate();
     self.movesshapes.push(shape);
@@ -207,6 +210,7 @@ impl State {
             0.0,
             1.0,
             1.0,
+            false,
         );
         shape.calculate();
         self.movesshapes.push(shape);
@@ -230,6 +234,7 @@ impl State {
             0.0,
             1.0,
             1.0,
+            false,
         );
         shape.calculate();
         self.movesshapes.push(shape);
@@ -252,6 +257,7 @@ impl State {
             0.0,
             1.0,
             1.0,
+            false,
         );
         self.movesshapes.push(shape);
     }

@@ -181,13 +181,13 @@ pub fn start() -> Result<(), JsValue> {
                 s.removemoveshape(context.clone());
                 s.shape("draw".to_string());
             }
-            if s.drag==true{
-                s.removedragshape(context.clone(),new_x,new_y);
-                s.shapeview(context.clone(), "drag".to_string());
-            }
-            s.checktodragshapes(new_x,new_y,value.clone());
-            s.shapeview(context.clone(),  "moves".to_string());
+            // if s.drag==true{
+            //     s.removedragshape(context.clone(),new_x,new_y);
+            //     s.shapeview(context.clone(), "drag".to_string());
+            // }
+            s.removedragshape(context.clone(),new_x,new_y);
             
+            s.shapeview(context.clone(),"moves".to_string());
         }) as Box<dyn FnMut(_)>);
 
         canvas.add_event_listener_with_callback("mousemove", click_down.as_ref().unchecked_ref())?;
@@ -218,12 +218,16 @@ pub fn start() -> Result<(), JsValue> {
                 s.movetoshape();
                 s.draw=false;
             }
-            if s.drag==true {
-                console::log_1(&"square darg is true".into());
-                s.dragtoshape();
-                s.drag=false;
+            // if s.drag==true {
+            //     console::log_1(&"square darg is true".into());
+
+            //     s.drag=false;
+            //     console::log_2(&"square darg is false".into(),&JsValue::from_bool(s.drag));
+            //     s.dragtoshape();
+                
                
-            }
+            // }
+            s.dragtoshape();
         }) as Box<dyn FnMut(_)>);
         canvas.add_event_listener_with_callback("mouseup",click_down.as_ref().unchecked_ref())?;
         click_down.forget();

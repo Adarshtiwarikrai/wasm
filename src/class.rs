@@ -21,6 +21,7 @@ pub struct Shape {
     pub dashspace: f64,
     pub stokewidth: f64,
     pub rotate: f64,
+    pub drag : bool
 }
 impl Shape {
   pub fn new(
@@ -40,6 +41,7 @@ impl Shape {
       dashspace: f64,
       stokewidth: f64,
       rotate: f64,
+      drag:bool
   ) -> Self {
       Shape {
           startx,
@@ -58,6 +60,7 @@ impl Shape {
           dashspace,
           stokewidth,
           rotate,
+          drag
       }
      
   }
@@ -67,7 +70,7 @@ impl Shape {
   }
   pub fn create_shape(&self, context: CanvasRenderingContext2d) {
       if self.shape == "square" {
-        console::log_1(&"square action in shape".into());
+        
         context.stroke_rect(self.startx, self.starty,self.length,self.width);
       } 
       else if self.shape == "circle" {
